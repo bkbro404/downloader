@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin: 50px auto;
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #333;
+        }
+        .options {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .options a {
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .options a:hover {
+            background-color: #0056b3;
+        }
+        .download-section {
+            display: none;
+        }
+        .quality-options {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Downloader</h1>
+        <div class="options">
+            <a href="#" onclick="showDownloader('instagram')">Instagram</a>
+            <a href="#" onclick="showDownloader('youtube')">YouTube</a>
+            <a href="#" onclick="showDownloader('tiktok')">TikTok</a>
+            <a href="#" onclick="showDownloader('facebook')">Facebook</a>
+        </div>
+
+        <div id="download-section" class="download-section">
+            <h2 id="platform-name">Download Video</h2>
+            <input type="url" id="video-url" placeholder="Paste the video URL here" style="width: 100%; padding: 10px; margin: 10px 0;">
+            <div class="quality-options">
+                <label for="quality">Select Quality:</label>
+                <select id="quality" style="padding: 5px;">
+                    <option value="360">360p</option>
+                    <option value="480">480p</option>
+                    <option value="720">720p</option>
+                    <option value="1080">1080p</option>
+                </select>
+            </div>
+            <button onclick="downloadVideo()" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; font-size: 16px;">Download</button>
+        </div>
+    </div>
+
+    <script>
+        function showDownloader(platform) {
+            document.getElementById('download-section').style.display = 'block';
+            document.getElementById('platform-name').textContent = `Download Video from ${platform}`;
+        }
+
+        async function downloadVideo() {
+            const url = document.getElementById('video-url').value;
+            const quality = document.getElementById('quality').value;
+
+            if (!url) {
+                alert('Please enter a valid URL.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url, quality }),
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = 'video.mp4';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.message}`);
+                }
+            } catch (err) {
+                alert('An error occurred while downloading the video.');
+            }
+        }
+    </script>
+</body>
+</html>
